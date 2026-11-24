@@ -1,0 +1,13 @@
+name: Set up NSH
+description: Installs the nightly NSH with the official script and puts it on PATH.
+runs:
+  using: composite
+  steps:
+    - name: Install NSH (nightly)
+      shell: bash
+      run: |
+        curl -fsSL https://nsh.dev/install.sh | sh -s -- --nightly
+        echo "$HOME/.nsh/bin" >> "$GITHUB_PATH"
+    - name: Show the NSH version
+      shell: bash
+      run: $HOME/.nsh/bin/nsh --version

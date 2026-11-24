@@ -8,11 +8,10 @@
 // their bare `@tanstack/*` imports are rewritten to relative paths into
 // `vendor/`, so that one copy of query-core serves the whole library.
 
-import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { gunzipSync } from "node:zlib";
+import { downloadPackage } from "./npm.mjs";
 
 const PACKAGES = [
   "query-core",
@@ -25,7 +24,6 @@ const REWRITES = {
   "@tanstack/query-persist-client-core": "query-persist-client-core/index.js",
 };
 
-const registry = (process.env.NPM_REGISTRY ?? "https://registry.npmjs.org").replace(/\/$/, "");
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function usage(message) {
@@ -55,54 +53,6 @@ function parseArgs(argv) {
   return { version, out };
 }
 
-async function fetchJson(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`GET ${url}: ${response.status} ${response.statusText}`);
-  return response.json();
-}
-
-async function fetchBytes(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`GET ${url}: ${response.status} ${response.statusText}`);
-  return Buffer.from(await response.arrayBuffer());
-}
-
-function* untar(buffer) {
-  let offset = 0;
-  let longName = null;
-  while (offset + 512 <= buffer.length) {
-    const header = buffer.subarray(offset, offset + 512);
-    if (header.every((byte) => byte === 0)) break;
-    const field = (start, length) => {
-      const bytes = header.subarray(start, start + length);
-      const end = bytes.indexOf(0);
-      return bytes.subarray(0, end === -1 ? length : end).toString("utf8");
-    };
-    let name = field(0, 100);
-    const size = Number.parseInt(field(124, 12).trim() || "0", 8);
-    const type = field(156, 1) || "0";
-    if (field(257, 6).startsWith("ustar")) {
-      const prefix = field(345, 155);
-      if (prefix) name = `${prefix}/${name}`;
-    }
-    const data = buffer.subarray(offset + 512, offset + 512 + size);
-    offset += 512 + Math.ceil(size / 512) * 512;
-    if (type === "x") {
-      const text = data.toString("utf8");
-      const match = /(?:^|\n)\d+ path=([^\n]*)\n/.exec(text);
-      longName = match ? match[1] : null;
-      continue;
-    }
-    if (type === "g") continue;
-    if (type === "0") yield { name: longName ?? name, data };
-    longName = null;
-  }
-}
-
-function integrityOf(bytes) {
-  return `sha512-${createHash("sha512").update(bytes).digest("base64")}`;
-}
-
 function isVendored(path) {
   if (path === "LICENSE") return true;
   if (!path.startsWith("build/modern/")) return false;
@@ -120,23 +70,17 @@ function rewriteImports(source, file) {
 }
 
 async function loadPackage(name, version) {
-  const meta = await fetchJson(`${registry}/@tanstack/${name}/${version}`);
-  const tarball = await fetchBytes(meta.dist.tarball);
-  const integrity = integrityOf(tarball);
-  if (integrity !== meta.dist.integrity) {
-    throw new Error(`@tanstack/${name}@${version}: tarball integrity ${integrity} does not match the registry's ${meta.dist.integrity}`);
-  }
+  const { meta, integrity, files: published } = await downloadPackage(`@tanstack/${name}`, version);
   for (const dependency of Object.keys(meta.dependencies ?? {})) {
     if (dependency in REWRITES && meta.dependencies[dependency] !== version) {
       throw new Error(`@tanstack/${name}@${version} depends on ${dependency}@${meta.dependencies[dependency]}, not ${version}`);
     }
   }
   const files = new Map();
-  for (const entry of untar(gunzipSync(tarball))) {
-    const path = entry.name.replace(/^package\//, "");
+  for (const [path, data] of published) {
     if (!isVendored(path)) continue;
     const file = path.replace(/^build\/modern\//, "");
-    const text = entry.data.toString("utf8");
+    const text = data.toString("utf8");
     files.set(file, name === "query-core" ? text : rewriteImports(text, file));
   }
   if (!files.has("index.js") || !files.has("index.d.ts") || !files.has("LICENSE")) {

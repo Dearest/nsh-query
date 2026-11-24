@@ -1,0 +1,83 @@
+name: Upstream query-core
+
+# Weekly, and on demand with a version: when npm has a newer
+# @tanstack/query-core than vendor/, open a pull request that moves vendor/
+# to it, with the upgrade report and the result of scripts/check.sh.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "query-core version to move to (default: npm's latest)"
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: upstream
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'Dearest/nsh-query'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ./.github/actions/setup-nsh
+
+      - name: Pick the version
+        id: pick
+        env:
+          REQUESTED: ${{ inputs.version }}
+        run: |
+          current="$(node -p 'require("./vendor/VERSIONS.json")["@tanstack/query-core"].version')"
+          target="${REQUESTED:-$(npm view @tanstack/query-core version)}"
+          branch="upstream/query-core-$target"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if [ "$target" = "$current" ]; then
+            echo "vendor/ is already at $current"; echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "$branch exists already"; echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update vendor/ and run the checks
+        if: steps.pick.outputs.skip == 'false'
+        run: scripts/upstream-update.sh "${{ steps.pick.outputs.target }}" "$RUNNER_TEMP/upstream"
+
+      - name: Keep the full report
+        if: steps.pick.outputs.skip == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: upstream-report
+          path: ${{ runner.temp }}/upstream
+
+      - name: Open the pull request
+        if: steps.pick.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT: ${{ steps.pick.outputs.current }}
+          TARGET: ${{ steps.pick.outputs.target }}
+          BRANCH: ${{ steps.pick.outputs.branch }}
+        run: |
+          # A patch release is a fix; a minor or major one may bring features.
+          if [ "${CURRENT%.*}" = "${TARGET%.*}" ]; then type=fix; else type=feat; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add vendor
+          git commit -m "$type(core): update query-core to $TARGET"
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "$type(core): update query-core to $TARGET" \
+            --body-file "$RUNNER_TEMP/upstream/body.md"
