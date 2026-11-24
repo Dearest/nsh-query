@@ -1,0 +1,6 @@
+.nsh/
+node_modules/
+*.junit.xml
+.DS_Store
+SPEC.md
+HANDOFF.md

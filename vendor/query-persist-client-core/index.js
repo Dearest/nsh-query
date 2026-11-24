@@ -1,0 +1,8 @@
+import { persistQueryClient, persistQueryClientRestore, persistQueryClientSave, persistQueryClientSubscribe } from "./persist.js";
+import { removeOldestQuery } from "./retryStrategies.js";
+import { PERSISTER_KEY_PREFIX, experimental_createQueryPersister } from "./createPersister.js";
+// src/index.ts
+/* istanbul ignore file */
+export { PERSISTER_KEY_PREFIX, experimental_createQueryPersister, persistQueryClient, persistQueryClientRestore, persistQueryClientSave, persistQueryClientSubscribe, removeOldestQuery };
+
+//# sourceMappingURL=index.js.map
