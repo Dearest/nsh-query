@@ -28,9 +28,9 @@ The pull request template has these as a checklist:
 
 1. **Source.** `src/<name>.ts` with one public export, exported from `src/index.ts` (or `src/persist/index.ts`). TSDoc on the export, with an example. No JSX in `src/`, and only erasable TypeScript (no `enum`, parameter properties or `namespace`): NSH strips types without transforming. Import query-core things from `./core`, never from `vendor/`.
 2. **Tests.** A fixture `tests/fixtures/<name>/<scenario>.tsx` (an entry that calls `mount`) and cases in `tests/<name>.test.tsx`. A test cannot reach into the app: render what you assert as `<Text>`, read it with `app.texts()`, and check `app.requests()` or `app.storage()`. Always open with a manual clock and stubbed network: `open(entry, { clock: {}, network: { ... } })`, and move time with `app.clock.runFor(ms)`.
-3. **Types.** Cases for the public types in `tests/types/`, with `// @ts-expect-error` on misuse.
-4. **API surface.** `tests/api-surface.test.tsx` fails when the exports change and prints the new list: paste it into `tests/api-surface.json`.
-5. **Docs.** A section in `docs/api.md` (signature, parameters, return, example, differences from TanStack). A behavior that differs from TanStack's documentation goes into `docs/differences.md`.
+3. **Types.** Add the export to the import and the `values` list in `tests/types/public-api.ts`. Public types of its own get cases in `tests/types/<name>.ts`, with `// @ts-expect-error` on misuse.
+4. **API surface.** Add the export's name to its entry's array in `tests/api-surface.json`, in alphabetical order; `tests/api-surface.test.tsx` fails until the file matches the runtime exports.
+5. **Docs.** A section in `docs/api.md` (signature, parameters, return, example, differences from TanStack) and a line in the contents list at its top. A behavior that differs from TanStack's documentation goes into `docs/differences.md`.
 6. **Decisions.** A design decision gets a page in `docs/adr/` (context, decision, alternatives); a change to an existing decision updates its page in the same pull request.
 7. `scripts/check.sh` passes.
 

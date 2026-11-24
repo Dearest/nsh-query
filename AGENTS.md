@@ -60,11 +60,11 @@ A test's topic is the `src/` file it covers: a change to `src/useMutation.ts` ge
 
 ## Adding a feature
 
-1. `src/<name>.ts` with one public export, TSDoc with an example; export it from `src/index.ts` (persistence: `src/persist/index.ts`).
-2. A fixture `tests/fixtures/<name>/<scenario>.tsx` and cases in `tests/<name>.test.tsx`.
-3. Type cases in `tests/types/<name>.ts` for its public types (`// @ts-expect-error` above misuse).
-4. Run `cd tests && nsh test api-surface.test.tsx`: it fails with the new export list; paste the JSON it prints into `tests/api-surface.json`.
-5. A section in `docs/api.md` (signature, parameters, return, example, differences from TanStack); `docs/differences.md` if the behavior differs from TanStack's documentation.
+1. `src/<name>.ts` with one public export, TSDoc with an example; export it from `src/index.ts` (persistence: `src/persist/index.ts`). A new export always gets a file of its own, even when it builds on an existing one.
+2. A fixture `tests/fixtures/<name>/<scenario>.tsx` and cases in `tests/<name>.test.tsx`. A small export built on an existing one may add its cases to that export's test file and fixtures instead.
+3. Add the export to the import and the `values` list in `tests/types/public-api.ts`. If it has public types of its own, add type cases in `tests/types/<name>.ts` (`// @ts-expect-error` above misuse).
+4. Add the export's name to its entry's array in `tests/api-surface.json`, in alphabetical order. `cd tests && nsh test api-surface.test.tsx` passes once the file matches the runtime exports.
+5. A section in `docs/api.md` (signature, parameters, return, example, differences from TanStack) and a line in the contents list at its top; `docs/differences.md` if the behavior differs from TanStack's documentation.
 6. If it uses a query-core member that is not documented API, add a check to `tests/fixtures/core-contract/contract.tsx` and its name to `tests/core-contract.test.tsx`.
 7. `scripts/check.sh` passes.
 
