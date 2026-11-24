@@ -18,5 +18,5 @@
 ## For agents
 
 - [AGENTS.md](AGENTS.md): working in this repository: checks, map, invariants, adding a feature
-- [Skill](skills/nsh-query/SKILL.md): writing NSH apps with nsh-query, and migrating from react-query or solid-query
+- [Skill](skills/nsh-query/SKILL.md): writing NSH apps with nsh-query; task pages in skills/nsh-query/references/ (hidden pages, desktop windows, persistence, migrating, testing)
 - [Contributing](CONTRIBUTING.md): scope rules, the checklist, commits and releases

@@ -117,22 +117,6 @@ const users = useQueries(() => ({
 // users.pending, users.names: combine must return an object or an array
 ```
 
-## Persisting the cache
-
-```tsx
-import { createNshStoragePersister, PersistQueryClientProvider } from "nsh-query/persist";
-
-const queryClient = new QueryClient({ defaultOptions: { queries: { gcTime: 24 * 60 * 60 * 1000 } } });
-
-mount(() => (
-  <PersistQueryClientProvider client={queryClient} persistOptions={{ persister: createNshStoragePersister() }}>
-    <App />
-  </PersistQueryClientProvider>
-));
-```
-
-`gcTime` must be at least `maxAge` (24 h by default). `useIsRestoring()` reads `true` while the cache is restored.
-
 ## Errors
 
 `throwOnError: true` throws the error to the nearest `<ErrorBoundary>` (from `"nsh"`) around the binding that reads `data`.
@@ -141,26 +125,14 @@ mount(() => (
 
 `useIsFetching()`, `useIsMutating()` and `useMutationState(() => ({ filters }))` return accessors: call them (`fetching() > 0`).
 
-## Migrating from react-query
+## More, by task
 
-- `useQuery({ ... })` → `useQuery(() => ({ ... }))`; same for every hook's options.
-- `const { data, isPending } = useQuery(...)` → `const todo = useQuery(...)`, then `todo.data`, `todo.isPending`.
-- `useIsFetching()` returns an accessor: `fetching()`.
-- Props/state read in options are signals or props: they update the query by themselves; no dependency arrays.
-- No Suspense hooks (`useSuspenseQuery`, `usePrefetchQuery`), no `QueryErrorResetBoundary`, no `HydrationBoundary`.
+Read the one that matches the task:
 
-## Migrating from solid-query
+- **A page or tab that is hidden but stays mounted** (stop its polling and updates): `references/hidden-pages.md`, the `subscribed` option.
+- **A desktop app** (several windows, what counts as focused, pausing in the background): `references/desktop.md`.
+- **Keeping the cache across launches**: `references/persistence.md`.
+- **Porting react-query or solid-query code**: `references/migrating.md`.
+- **Writing tests for an app that uses nsh-query**: `references/testing.md`.
 
-- Same API names and shape. Drop `reconcile`, `deferStream` and Suspense usage (`data` is a plain value, not a resource).
-- The last argument is a `QueryClient`, not an accessor: `useQuery(options, queryClient)`.
-- `createQuery` → `useQuery` (only `use*` names exist). `IsRestoringProvider` → `IsRestoringContext.Provider`.
-- `<Show>`/`<For>` → NSH's `<If>`/`<Each>`; `createSignal` → `signal`.
-
-## Testing an app that uses it
-
-Open the app with a manual clock and stubbed network, and move time explicitly:
-
-```ts
-const app = await open("./App.tsx", { clock: {}, network: { "https://api.example.com/todos": { body: [] } } });
-await app.clock!.runFor(1000);
-```
+Every export's signature and options: `docs/api.md` in https://github.com/Dearest/nsh-query.
