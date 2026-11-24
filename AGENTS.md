@@ -46,7 +46,7 @@ tests/                 an NSH app depending on the library by path ({ "path": ".
   PARITY.md            every upstream hook test and what became of it
 example/               a demo app with its own tests (an NSH app, { "path": ".." })
 docs/                  api.md, differences.md, upgrading-query-core.md, adr/
-skills/nsh-query/      the skill for agents writing apps with nsh-query
+skills/nsh-query/      the skill for agents writing apps with nsh-query: SKILL.md (every task) + references/ (one page per task)
 ```
 
 A test's topic is the `src/` file it covers: a change to `src/useMutation.ts` gets cases in `tests/useMutation.test.tsx` with fixtures in `tests/fixtures/useMutation/`.
