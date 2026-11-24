@@ -8,6 +8,7 @@ const members = [
   "_optimisticResults: optimistic",
   "_optimisticResults: isRestoring",
   "QueryObserver.trackProp",
+  "QueriesObserver.getOptimisticResult",
   "QueryObserver.updateResult",
   "environmentManager.setIsServer",
   "focusManager.setEventListener",

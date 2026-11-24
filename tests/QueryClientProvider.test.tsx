@@ -28,3 +28,10 @@ test("the provider mounts the client while it is shown and unmounts it after", a
   await app.press("Report");
   expect(app.texts()).toContain("focus listeners: false, online listeners: false");
 });
+
+test("QueryClientContext provides a client as is, without mounting it", async () => {
+  const app = await open("./fixtures/QueryClientProvider/context-only.tsx", { clock: {}, network });
+  await app.waitFor("text:todos: 1");
+  expect(app.texts()).toContain("same client: true");
+  expect(app.texts()).toContain("client mounted: false");
+});

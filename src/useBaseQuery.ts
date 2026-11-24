@@ -5,6 +5,7 @@ import type { QueryKey, QueryObserver, QueryObserverOptions, QueryObserverResult
 import { useIsRestoring } from "./isRestoring";
 import type { QueryClient } from "./QueryClient";
 import { useQueryClient } from "./QueryClientProvider";
+import { readonlyView } from "./readonlyView";
 import type { UseBaseQueryOptions } from "./types";
 
 /**
@@ -49,33 +50,18 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
     });
   });
 
-  const read = (prop: PropertyKey): unknown => {
-    const current = result();
-    if (
-      current.isError &&
-      !current.isFetching &&
-      shouldThrowError(observer.options.throwOnError, [current.error, observer.getCurrentQuery()])
-    ) {
-      throw current.error;
-    }
-    return (current as unknown as Record<PropertyKey, unknown>)[prop];
-  };
-
-  return new Proxy({} as QueryObserverResult<TData, TError>, {
-    get(_, prop) {
-      if (typeof prop === "string") observer.trackProp(prop as keyof QueryObserverResult);
-      return read(prop);
+  return readonlyView(
+    () => {
+      const current = result();
+      if (
+        current.isError &&
+        !current.isFetching &&
+        shouldThrowError(observer.options.throwOnError, [current.error, observer.getCurrentQuery()])
+      ) {
+        throw current.error;
+      }
+      return current;
     },
-    has(_, prop) {
-      return prop in result();
-    },
-    ownKeys() {
-      return Reflect.ownKeys(result());
-    },
-    getOwnPropertyDescriptor(_, prop) {
-      if (!(prop in result())) return undefined;
-      if (typeof prop === "string") observer.trackProp(prop as keyof QueryObserverResult);
-      return { configurable: true, enumerable: true, writable: false, value: read(prop) };
-    },
-  });
+    (prop) => observer.trackProp(prop as keyof QueryObserverResult),
+  );
 }

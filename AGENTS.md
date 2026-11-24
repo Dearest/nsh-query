@@ -19,15 +19,30 @@ It checks that `vendor/` is exactly what the sync script produces, then runs `ns
 ## Map
 
 ```text
-src/            the library (one export per file; src/index.ts re-exports)
-src/core.ts     the only file that imports vendor/query-core
-vendor/         @tanstack packages, written by scripts/sync-vendor.mjs, never edited by hand
-scripts/        sync-vendor.mjs, check.sh
-tests/          an NSH app that depends on the library by path ({ "path": ".." })
+src/                 the library (one public export per file; src/index.ts re-exports)
+src/core.ts          the only file that imports vendor/query-core
+src/useBaseQuery.ts  the adapter behind useQuery and useInfiniteQuery
+src/readonlyView.ts  the reactive, read-only result object every hook returns
+vendor/              @tanstack packages, written by scripts/sync-vendor.mjs, never edited by hand
+scripts/             sync-vendor.mjs, check-exports.mjs, check.sh
+tests/               an NSH app that depends on the library by path ({ "path": ".." })
   fixtures/<topic>/*.tsx   one entry per scenario, each calls mount()
   <topic>.test.tsx         tests for src/<topic>.ts, opening fixtures/<topic>/*
-docs/adr/       design decisions, one page each
+  support/                 components and stubs shared by fixtures (not entries)
+  types/*.ts               type-level cases, checked by nsh check, never run
+  api-surface.json         the runtime exports of each entry (api-surface.test.tsx)
+  core-contract.test.tsx   the query-core internals the adapter relies on
+docs/adr/            design decisions, one page each
 ```
+
+## Adding a feature
+
+1. `src/<name>.ts` with one public export and TSDoc with an example; export it from `src/index.ts`.
+2. A fixture under `tests/fixtures/<name>/` and cases in `tests/<name>.test.tsx`.
+3. Type cases in `tests/types/` for its public types (`// @ts-expect-error` for misuse).
+4. Update `tests/api-surface.json`: `api-surface.test.tsx` fails with the JSON to paste.
+5. If it uses a query-core member that is not documented API, add a check to `tests/fixtures/core-contract/contract.tsx` and its name to `tests/core-contract.test.tsx`.
+6. `scripts/check.sh` passes.
 
 ## Invariants
 

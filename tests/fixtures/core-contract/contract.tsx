@@ -4,10 +4,11 @@ import {
   focusManager,
   notifyManager,
   onlineManager,
+  QueriesObserver,
   QueryClient,
   QueryObserver,
 } from "nsh-query";
-import type { QueryObserverResult } from "nsh-query";
+import type { QueryObserverOptions, QueryObserverResult } from "nsh-query";
 
 // The query-core members the adapter relies on that are internal or
 // semi-public. Each check renders `<name>: ok` or `<name>: FAIL <reason>`.
@@ -87,6 +88,22 @@ const checks: [string, () => void | Promise<void>][] = [
       offFetching();
       assert(seen.dataOnly === after.dataOnly, `data-only observer notified ${seen.dataOnly - after.dataOnly} times on a refetch that left data as it was`);
       assert(seen.fetching >= after.fetching + 2, "isFetching observer not notified of the refetch");
+    },
+  ],
+  [
+    "QueriesObserver.getOptimisticResult",
+    () => {
+      const client = new QueryClient();
+      const queries: QueryObserverOptions[] = [1, 2].map((id) => ({ queryKey: ["todos", id], queryFn: () => id }));
+      const observer = new QueriesObserver<number>(client, queries);
+      const combine = (results: QueryObserverResult[]) => results.length;
+      const tuple = observer.getOptimisticResult(queries, combine);
+      assert(Array.isArray(tuple) && tuple.length === 3, "not a [result, getCombinedResult, trackResult] tuple");
+      const [results, getCombinedResult, trackResult] = tuple;
+      assert(results.length === 2 && results[0]?.status === "pending", "results not one per query");
+      const tracked = trackResult();
+      assert(tracked.length === 2 && tracked[1]?.status === "pending", "trackResult not one result per query");
+      assert(getCombinedResult(tracked) === 2, "getCombinedResult did not apply combine");
     },
   ],
   [

@@ -19,8 +19,19 @@ export { connectNsh } from "./connect";
 export type { ConnectNshOptions, LifecycleState } from "./connect";
 export { IsRestoringContext, useIsRestoring } from "./isRestoring";
 export { useQuery } from "./useQuery";
+export { useInfiniteQuery } from "./useInfiniteQuery";
+export { useQueries } from "./useQueries";
+export type { QueriesOptions, QueriesResults } from "./useQueries";
+export { useMutation } from "./useMutation";
+export { useIsFetching } from "./useIsFetching";
+export { useIsMutating } from "./useIsMutating";
+export { useMutationState } from "./useMutationState";
+export type { MutationStateOptions } from "./useMutationState";
 export { queryOptions } from "./queryOptions";
 export type { DefinedInitialDataOptions, UndefinedInitialDataOptions } from "./queryOptions";
+export { infiniteQueryOptions } from "./infiniteQueryOptions";
+export type { DefinedInitialDataInfiniteOptions, UndefinedInitialDataInfiniteOptions } from "./infiniteQueryOptions";
+export { mutationOptions } from "./mutationOptions";
 export type {
   DefinedUseBaseQueryResult,
   DefinedUseInfiniteQueryResult,
