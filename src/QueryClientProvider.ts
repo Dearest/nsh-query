@@ -28,8 +28,8 @@ export function useQueryClient(queryClient?: QueryClient): QueryClient {
   const client = QueryClientContext();
   if (!client) {
     throw new Error(
-      "nsh-query: no QueryClient set. Wrap the component in <QueryClientProvider client={queryClient}>, " +
-        "or pass the client as the last argument (useQuery(options, queryClient)).",
+      "No QueryClient set, use QueryClientProvider to set one. Wrap the component in " +
+        "<QueryClientProvider client={queryClient}>, or pass the client as the last argument (useQuery(options, queryClient)).",
     );
   }
   return client;

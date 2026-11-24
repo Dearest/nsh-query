@@ -3,8 +3,9 @@
 #   1. vendor/ is exactly what scripts/sync-vendor.mjs writes for the versions
 #      recorded in vendor/VERSIONS.json
 #   2. every export of the library's own is used in tests/
-#   3. tests/: nsh check (types included), nsh test
-#   4. example/: nsh check, nsh test (once example/ exists)
+#   3. every test tests/PARITY.md names exists
+#   4. tests/: nsh check (types included), nsh test
+#   5. example/: nsh check, nsh test (once example/ exists)
 #
 # Set JUNIT_DIR to also write JUnit reports there.
 
@@ -42,6 +43,9 @@ run_app() {
 
 step "every export of nsh-query's own has a test"
 node scripts/check-exports.mjs
+
+step "tests/PARITY.md points to existing tests"
+node scripts/check-parity.mjs
 
 run_app tests
 if [[ -f example/nsh.json ]]; then

@@ -34,9 +34,16 @@ export interface ConnectNshOptions {
 export function connectNsh(options: ConnectNshOptions = {}): void {
   const isFocused = options.focused ?? ((state: LifecycleState) => state !== "background");
 
+  let first = true;
   effect(() => {
-    const state = lifecycle();
-    untracked(() => focusManager.setFocused(isFocused(state)));
+    const focused = isFocused(lifecycle());
+    untracked(() => {
+      // The first run only records the state: setting it calls the focus
+      // listeners, which would count the app starting as a return to it.
+      const skip = first && focusManager.isFocused() === focused;
+      first = false;
+      if (!skip) focusManager.setFocused(focused);
+    });
   });
 
   effect(() => {

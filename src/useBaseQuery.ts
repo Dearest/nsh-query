@@ -18,6 +18,11 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
   Observer: typeof QueryObserver,
   queryClient?: QueryClient,
 ): QueryObserverResult<TData, TError> {
+  if (typeof options !== "function") {
+    throw new Error(
+      "Bad argument type. nsh-query takes the options as a function: useQuery(() => ({ queryKey, queryFn })).",
+    );
+  }
   const client = useQueryClient(queryClient);
   const isRestoring = useIsRestoring();
 
@@ -31,7 +36,7 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
 
   const initialOptions = untracked(defaulted);
   const observer = new Observer<TQueryFnData, TError, TData, TQueryData, TQueryKey>(client, initialOptions);
-  const result = signal(observer.getOptimisticResult(initialOptions), { equals: false });
+  const result = signal(observer.getOptimisticResult(initialOptions), { equals: shallowEqual });
 
   effect(() => {
     if (isRestoring()) return;
@@ -50,18 +55,22 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
     });
   });
 
-  return readonlyView(
-    () => {
-      const current = result();
-      if (
-        current.isError &&
-        !current.isFetching &&
-        shouldThrowError(observer.options.throwOnError, [current.error, observer.getCurrentQuery()])
-      ) {
-        throw current.error;
-      }
-      return current;
-    },
-    (prop) => observer.trackProp(prop as keyof QueryObserverResult),
-  );
+  return readonlyView(result, (prop) => {
+    observer.trackProp(prop as keyof QueryObserverResult);
+    if (prop !== "data") return;
+    const current = untracked(result);
+    if (
+      current.isError &&
+      !current.isFetching &&
+      shouldThrowError(observer.options.throwOnError, [current.error, observer.getCurrentQuery()])
+    ) {
+      throw current.error;
+    }
+  });
+}
+
+function shallowEqual(a: object, b: object): boolean {
+  const keys = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) return false;
+  return keys.every((key) => (a as Record<string, unknown>)[key] === (b as Record<string, unknown>)[key]);
 }
