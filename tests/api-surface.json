@@ -53,5 +53,13 @@
     "useQuery",
     "useQueryClient"
   ],
-  "nsh-query/persist": []
+  "nsh-query/persist": [
+    "PersistQueryClientProvider",
+    "createNshStoragePersister",
+    "persistQueryClient",
+    "persistQueryClientRestore",
+    "persistQueryClientSave",
+    "persistQueryClientSubscribe",
+    "removeOldestQuery"
+  ]
 }

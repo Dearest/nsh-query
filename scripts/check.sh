@@ -22,7 +22,7 @@ version="$(node -e 'const v=require("./vendor/VERSIONS.json");const s=new Set(Ob
 scratch="$(mktemp -d)"
 trap 'rm -rf "$scratch"' EXIT
 node scripts/sync-vendor.mjs "$version" --out "$scratch/vendor"
-if ! diff -r "$scratch/vendor" vendor; then
+if ! diff -r -x .DS_Store "$scratch/vendor" vendor; then
   echo "vendor/ differs from a fresh sync of $version: run 'node scripts/sync-vendor.mjs $version' and do not edit vendor/ by hand" >&2
   exit 1
 fi
