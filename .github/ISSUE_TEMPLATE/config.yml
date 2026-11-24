@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/Dearest/nsh-query/discussions
+    about: Ask and discuss in Discussions. Issues are for bugs and accepted proposals.
+  - name: Security vulnerability
+    url: https://github.com/Dearest/nsh-query/security/advisories/new
+    about: Report it privately.

@@ -1,0 +1,48 @@
+name: CI
+
+# The same scripts/check.sh a contributor runs locally. No secrets: pull
+# requests from forks run it in full. Weekly too, to catch breaking changes in
+# NSH nightly.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 5 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ./.github/actions/setup-nsh
+      - name: scripts/check.sh
+        run: scripts/check.sh
+        env:
+          JUNIT_DIR: ${{ runner.temp }}/junit
+      - name: vendor/ is committed as synced
+        run: git diff --exit-code vendor/
+      - name: Upload the JUnit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ matrix.os }}
+          path: ${{ runner.temp }}/junit
+          if-no-files-found: ignore

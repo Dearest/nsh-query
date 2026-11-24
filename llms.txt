@@ -1,0 +1,22 @@
+# nsh-query
+
+> TanStack Query for NSH (nsh.dev) TSX apps: useQuery, useMutation, useInfiniteQuery, useQueries, persistence in NSH Storage. query-core runs unmodified; options are functions and results are read by property, as in solid-query.
+
+## Docs
+
+- [README](README.md): install, a minimal example, the three rules, platform behavior, persistence, compatibility
+- [API](docs/api.md): every export with its signature, parameters, return value, example and differences from TanStack
+- [Differences](docs/differences.md): every difference from solid-query and react-query, and why
+- [Upgrading query-core](docs/upgrading-query-core.md): the sync script, the weekly upgrade pull request, how to review it
+- [ADR 0001](docs/adr/0001-alignment-layers.md): which TanStack adapter nsh-query follows for API, implementation and behavior
+- [ADR 0002](docs/adr/0002-vendor-query-core.md): why query-core is vendored rather than an npm dependency
+- [ADR 0003](docs/adr/0003-focus-semantics.md): focused means "not in the background"
+- [ADR 0004](docs/adr/0004-use-naming.md): only use* names
+- [ADR 0005](docs/adr/0005-proxy-result.md): results are read-only proxies that track what is read
+- [Upstream parity](tests/PARITY.md): every upstream solid-query and react-query hook test, ported or why not
+
+## For agents
+
+- [AGENTS.md](AGENTS.md): working in this repository: checks, map, invariants, adding a feature
+- [Skill](skills/nsh-query/SKILL.md): writing NSH apps with nsh-query, and migrating from react-query or solid-query
+- [Contributing](CONTRIBUTING.md): scope rules, the checklist, commits and releases

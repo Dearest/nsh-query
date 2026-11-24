@@ -1,0 +1,23 @@
+name: Release
+
+# release-please keeps a release pull request up to date from the Conventional
+# Commits on main (nsh.json's version, CHANGELOG.md). Merging it tags
+# v<version> and publishes a GitHub Release, which is what `nsh add` installs.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    if: github.repository == 'Dearest/nsh-query'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

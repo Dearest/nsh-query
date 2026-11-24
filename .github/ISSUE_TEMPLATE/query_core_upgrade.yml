@@ -1,0 +1,25 @@
+name: query-core upgrade problem
+description: Something broke, or needs following, after a query-core upgrade.
+labels: [query-core]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: query-core versions
+      description: From and to, as in the upgrade pull request.
+      placeholder: 5.108.4 -> 5.110.0
+    validations:
+      required: true
+  - type: textarea
+    id: failure
+    attributes:
+      label: What fails
+      description: The failing tests or `scripts/check.sh` output, or the behavior that changed.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: upstream
+    attributes:
+      label: Upstream change
+      description: The part of the upgrade report (or the TanStack release or pull request) that explains it, if known.

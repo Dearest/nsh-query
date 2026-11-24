@@ -1,0 +1,46 @@
+name: Bug report
+description: nsh-query does something wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check first whether TanStack Query behaves the same way in react-query or solid-query: caching, retries and deduplication are query-core's, and belong in [TanStack/query](https://github.com/TanStack/query/issues).
+  - type: input
+    id: nsh-version
+    attributes:
+      label: NSH version
+      description: The output of `nsh --version`.
+      placeholder: nsh 0.6.0 (f577c51 nightly 2026-11-22)
+    validations:
+      required: true
+  - type: input
+    id: nsh-query-version
+    attributes:
+      label: nsh-query version
+      description: The version in your app's `nsh.lock`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Platform
+      description: Where it happens (headless tests, macOS, iOS, Android, web, ...).
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: |
+        A fixture and a test, as in `tests/fixtures/` and `tests/*.test.tsx`: an entry that mounts the smallest app showing the problem, and the steps (with a manual clock: `open(entry, { clock: {} })`). A link to a repository works too.
+      render: tsx
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened
+    validations:
+      required: true
