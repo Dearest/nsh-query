@@ -1,0 +1,11 @@
+{
+  "name": "nsh-query example",
+  "id": "com.example.nshqueryexample",
+  "version": "1.0.0",
+  "build": 1,
+  "dependencies": {
+    "nsh-query": {
+      "path": ".."
+    }
+  }
+}

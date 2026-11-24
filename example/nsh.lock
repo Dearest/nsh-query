@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "packages": [
+    {
+      "name": "nsh-query",
+      "version": "0.1.0",
+      "path": "..",
+      "exports": {
+        "nsh-query": "src/index.ts",
+        "nsh-query/persist": "src/persist/index.ts"
+      }
+    }
+  ]
+}

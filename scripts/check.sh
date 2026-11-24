@@ -5,7 +5,7 @@
 #   2. every export of the library's own is used in tests/
 #   3. every test tests/PARITY.md names exists
 #   4. tests/: nsh check (types included), nsh test
-#   5. example/: nsh check, nsh test (once example/ exists)
+#   5. example/: nsh check, nsh test
 #
 # Set JUNIT_DIR to also write JUnit reports there.
 
@@ -48,8 +48,6 @@ step "tests/PARITY.md points to existing tests"
 node scripts/check-parity.mjs
 
 run_app tests
-if [[ -f example/nsh.json ]]; then
-  run_app example
-fi
+run_app example
 
 step "all checks passed"
