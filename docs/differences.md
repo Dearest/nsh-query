@@ -14,7 +14,7 @@ nsh-query takes its API shape from `@tanstack/solid-query`, its implementation f
 | Restoring provider | `IsRestoringProvider` | `IsRestoringProvider` | `IsRestoringContext` (use `IsRestoringContext.Provider`) |
 | `QueryClientContext` value | an accessor of the client | the client | the client |
 | `useQueries` `combine` | any value | any value | an object or an array (the result is read by property) |
-| `subscribed` option | no | yes | no |
+| `subscribed` option | no | yes | yes, as react-query (`useQuery`, `useInfiniteQuery`, `useQueries`) |
 | Missing client | "No QueryClient set, use QueryClientProvider to set one" | same | same text, followed by how to fix it |
 
 ## Not available

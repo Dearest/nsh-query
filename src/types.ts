@@ -22,7 +22,16 @@ export interface UseBaseQueryOptions<
   TData = TQueryFnData,
   TQueryData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey,
-> extends OmitKeyof<QueryObserverOptions<TQueryFnData, TError, TData, TQueryData, TQueryKey>, "suspense"> {}
+> extends OmitKeyof<QueryObserverOptions<TQueryFnData, TError, TData, TQueryData, TQueryKey>, "suspense"> {
+  /**
+   * `false` detaches the observer from the query cache: no fetches, no polling,
+   * no cache updates, and the query does not count this observer as active.
+   * The result stays as it was. Back to `true`, it subscribes again and
+   * refetches stale data, as on mount. For pages hidden but kept mounted.
+   * @defaultValue true
+   */
+  subscribed?: boolean;
+}
 
 /** What the accessor passed to `useQuery` returns, and what `queryOptions` takes. */
 export interface QueryOptions<
@@ -73,6 +82,11 @@ export interface InfiniteQueryOptions<
     "queryKey" | "suspense"
   > {
   queryKey: TQueryKey;
+  /**
+   * `false` detaches the observer from the query cache, as `useQuery`'s `subscribed`.
+   * @defaultValue true
+   */
+  subscribed?: boolean;
 }
 
 /** The first argument of `useInfiniteQuery`: a function returning the options. */

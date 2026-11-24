@@ -1,4 +1,4 @@
-import { skipToken, useQuery } from "nsh-query";
+import { skipToken, useQueries, useQuery } from "nsh-query";
 import type { DefinedUseQueryResult, UseQueryResult } from "nsh-query";
 import { expectType, fetchTodo, fetchTodos } from "./helpers";
 import type { Equal, Todo } from "./helpers";
@@ -47,4 +47,14 @@ export function useQueryCases(props: { id: number | undefined }) {
 
   // @ts-expect-error options are a function, not an object
   useQuery({ queryKey: ["todos"], queryFn: fetchTodos });
+}
+
+export function subscribedCases(ids: number[]) {
+  useQuery(() => ({ queryKey: ["todos"], queryFn: fetchTodos, subscribed: false }));
+  // @ts-expect-error subscribed is a boolean
+  useQuery(() => ({ queryKey: ["todos"], queryFn: fetchTodos, subscribed: "no" }));
+
+  useQueries(() => ({ queries: ids.map((id) => ({ queryKey: ["todos", id], queryFn: () => fetchTodo(id) })), subscribed: false }));
+  // @ts-expect-error subscribed is a boolean
+  useQueries(() => ({ queries: [{ queryKey: ["todos"], queryFn: fetchTodos }], subscribed: 1 }));
 }

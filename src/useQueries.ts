@@ -24,7 +24,7 @@ type UseQueryOptionsForUseQueries<
   TError = DefaultError,
   TData = TQueryFnData,
   TQueryKey extends QueryKey = QueryKey,
-> = OmitKeyof<QueryOptions<TQueryFnData, TError, TData, TQueryKey>, "placeholderData"> & {
+> = OmitKeyof<QueryOptions<TQueryFnData, TError, TData, TQueryKey>, "placeholderData" | "subscribed"> & {
   placeholderData?: TQueryFnData | QueriesPlaceholderDataFunction<TQueryFnData>;
 };
 
@@ -142,19 +142,27 @@ export function useQueries<T extends Array<any>, TCombinedResult extends object 
   queriesOptions: Accessor<{
     queries: readonly [...QueriesOptions<T>] | readonly [...{ [K in keyof T]: GetOptions<T[K]> }];
     combine?: (result: QueriesResults<T>) => TCombinedResult;
+    /** `false` detaches every query's observer from the cache, as `useQuery`'s `subscribed`. */
+    subscribed?: boolean;
   }>,
   queryClient?: QueryClient,
 ): TCombinedResult {
   const client = useQueryClient(queryClient);
   const isRestoring = useIsRestoring();
 
+  const current = computed(() => queriesOptions());
+  const subscribed = computed(() => current().subscribed !== false);
+
   const defaulted = computed(() => {
-    const { queries, combine } = queriesOptions();
+    const { queries, combine } = current();
     const restoring = isRestoring();
+    const attached = subscribed();
     return {
       queries: queries.map((options) => {
         const defaultedOptions = client.defaultQueryOptions(options as QueryObserverOptions);
-        defaultedOptions._optimisticResults = restoring ? "isRestoring" : "optimistic";
+        if (restoring) defaultedOptions._optimisticResults = "isRestoring";
+        else if (attached) defaultedOptions._optimisticResults = "optimistic";
+        else delete defaultedOptions._optimisticResults;
         return defaultedOptions;
       }),
       options: (combine ? { combine } : undefined) as QueriesObserverOptions<TCombinedResult> | undefined,
@@ -166,7 +174,7 @@ export function useQueries<T extends Array<any>, TCombinedResult extends object 
   const version = signal(0);
 
   effect(() => {
-    if (isRestoring()) return;
+    if (isRestoring() || !subscribed()) return;
     untracked(() => cleanup(observer.subscribe(notifyManager.batchCalls(() => version.update((n) => n + 1)))));
   });
 

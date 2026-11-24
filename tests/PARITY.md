@@ -8,7 +8,7 @@ Every test case of `@tanstack/solid-query` and `@tanstack/react-query` 5.108.4 f
 
 A react-query case with the same name as a solid-query one usually points to the same test. The tests are `tests/<topic>.parity*.test.tsx`, their scenarios `tests/fixtures/<topic>/parity*.tsx`. `scripts/check-parity.mjs` (run by `scripts/check.sh`) checks that every named test exists.
 
-Counts: ported 499, NSH differs 11, not applicable 80 (590 upstream cases).
+Counts: ported 504, NSH differs 11, not applicable 75 (590 upstream cases).
 
 Porting a row marked not applicable that you think is applicable, or a new upstream case, is a good first contribution: see `CONTRIBUTING.md`.
 
@@ -176,7 +176,7 @@ Porting a row marked not applicable that you think is applicable, or a new upstr
 |---|---|---|
 | useQueries › should settle after fetched data reaches an inline selector (throws: %s) | ported | `useQueries.parity.test.tsx` › should settle after fetched data reaches an inline selector (throws: false)<br>`useQueries.parity.test.tsx` › should settle after fetched data reaches an inline selector (throws: true) |
 | useQueries › should return the correct states | ported | `useQueries.parity.test.tsx` › should return the correct states |
-| useQueries › should not optimistically show fetching when unsubscribed | not applicable | nsh-query's useQueries has no `subscribed` option. |
+| useQueries › should not optimistically show fetching when unsubscribed | ported | `useQueries.subscribed.test.tsx` › should not optimistically show fetching when unsubscribed |
 | useQueries › should track results | ported | `useQueries.parity.test.tsx` › should track results |
 | useQueries › should throw error if in one of queries' queryFn throws and throwOnError is in use | ported | `useQueries.parity.test.tsx` › should throw error if in one of queries' queryFn throws and throwOnError is in use |
 | useQueries › should throw error if in one of queries' queryFn throws and throwOnError function resolves to true | ported | `useQueries.parity.test.tsx` › should throw error if in one of queries' queryFn throws and throwOnError function resolves to true |
@@ -335,10 +335,10 @@ Porting a row marked not applicable that you think is applicable, or a new upstr
 | useQuery › networkMode always › should start fetching always queries even if you are offline | ported | `useQuery.parity-solid-2b.test.tsx` › should start fetching always queries even if you are offline |
 | useQuery › networkMode always › should not pause retries of always queries | ported | `useQuery.parity-solid-2b.test.tsx` › should not pause retries of always queries |
 | useQuery › networkMode offlineFirst › should start fetching offlineFirst queries if you are offline, but pause retries | ported | `useQuery.parity-solid-2b.test.tsx` › should start fetching offlineFirst queries if you are offline, but pause retries |
-| useQuery › subscribed › should be able to toggle subscribed | not applicable | `subscribed` is a react-query-only option; nsh-query (like solid-query) has no `subscribed` option. |
-| useQuery › subscribed › should not optimistically show fetching when unsubscribed | not applicable | `subscribed` is a react-query-only option; nsh-query (like solid-query) has no `subscribed` option. |
-| useQuery › subscribed › should not be attached to the query when subscribed is false | not applicable | `subscribed` is a react-query-only option; nsh-query (like solid-query) has no `subscribed` option. |
-| useQuery › subscribed › should not re-render when data is added to the cache when subscribed is false | not applicable | `subscribed` is a react-query-only option; nsh-query (like solid-query) has no `subscribed` option. |
+| useQuery › subscribed › should be able to toggle subscribed | ported | `useQuery.subscribed.test.tsx` › should be able to toggle subscribed |
+| useQuery › subscribed › should not optimistically show fetching when unsubscribed | ported | `useQuery.subscribed.test.tsx` › should not optimistically show fetching when unsubscribed |
+| useQuery › subscribed › should not be attached to the query when subscribed is false | ported | `useQuery.subscribed.test.tsx` › should not be attached to the query when subscribed is false |
+| useQuery › subscribed › should not re-render when data is added to the cache when subscribed is false | ported | `useQuery.subscribed.test.tsx` › should not re-render when data is added to the cache when subscribed is false |
 | useQuery › should have status=error on mount when a query has failed | ported | `useQuery.parity-solid-2b.test.tsx` › should have status=error on mount when a query has failed |
 | useQuery › should respect updatedAt in setQueryData | ported | `useQuery.parity-solid-2b.test.tsx` › should respect updatedAt in setQueryData |
 | useQuery › should increase errorUpdateCount on each fetch failure | ported | `useQuery.parity-solid-2b.test.tsx` › should increase errorUpdateCount on each fetch failure |

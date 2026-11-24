@@ -26,11 +26,16 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
   const client = useQueryClient(queryClient);
   const isRestoring = useIsRestoring();
 
+  const current = computed(() => options());
+  const subscribed = computed(() => current().subscribed !== false);
+
   const defaulted = computed(() => {
     const defaultedOptions = client.defaultQueryOptions(
-      options() as QueryObserverOptions<TQueryFnData, TError, TData, TQueryData, TQueryKey>,
+      current() as QueryObserverOptions<TQueryFnData, TError, TData, TQueryData, TQueryKey>,
     );
-    defaultedOptions._optimisticResults = isRestoring() ? "isRestoring" : "optimistic";
+    if (isRestoring()) defaultedOptions._optimisticResults = "isRestoring";
+    else if (subscribed()) defaultedOptions._optimisticResults = "optimistic";
+    else delete defaultedOptions._optimisticResults;
     return defaultedOptions;
   });
 
@@ -39,7 +44,7 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
   const result = signal(observer.getOptimisticResult(initialOptions), { equals: shallowEqual });
 
   effect(() => {
-    if (isRestoring()) return;
+    if (isRestoring() || !subscribed()) return;
     untracked(() => {
       cleanup(observer.subscribe(notifyManager.batchCalls((next) => result.set(next))));
       observer.updateResult();
