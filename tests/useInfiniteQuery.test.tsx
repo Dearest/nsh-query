@@ -40,3 +40,10 @@ test("infiniteQueryOptions keys the cache: getQueryData reads the pages with its
   await app.clock!.runFor(50);
   expect(app.texts()).toContain("cached pages: 2");
 });
+
+test("a property first read after it changed shows the current value", async () => {
+  const app = await open("./fixtures/useInfiniteQuery/late-read.tsx", { clock: {}, network });
+  await app.clock!.runFor(100);
+  await app.press("Detail");
+  expect(app.texts()).toContain("pages: 1, hasNextPage: true");
+});

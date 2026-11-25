@@ -83,6 +83,41 @@ test("field tracking: the same binding runs again when data changes", async () =
   expect(runsShown(app.texts())).toBe(before + 1);
 });
 
+test("a property first read after it changed shows the current value", async () => {
+  const app = await open("./fixtures/useQuery/late-read.tsx", {
+    clock: {},
+    network: { "https://api.test/todos/1": { ...todo(1, "Walk the dog"), delay: 50 } },
+  });
+  await app.clock!.runFor(50);
+  await app.press("Handler");
+  expect(app.texts()).toContain("handler: success");
+  await app.press("Detail");
+  expect(app.texts()).toContain("title: Walk the dog");
+
+  await app.press("Refetch");
+  await app.press("Indicator");
+  expect(app.texts()).toContain("fetching: true");
+  await app.clock!.runFor(50);
+  expect(app.texts()).toContain("fetching: false");
+  expect(app.requests()).toHaveLength(2);
+});
+
+test("a late first read does not make the bindings of unchanged properties run again later", async () => {
+  const app = await open("./fixtures/useQuery/late-read.tsx", {
+    clock: {},
+    network: { "https://api.test/todos/1": { ...todo(1, "Walk the dog"), delay: 50 } },
+  });
+  await app.clock!.runFor(50);
+  await app.press("Detail");
+  await app.press("Count");
+  const before = runsShown(app.texts());
+  await app.press("Refetch");
+  await app.clock!.runFor(50);
+  await app.press("Count");
+  expect(runsShown(app.texts())).toBe(before);
+  expect(app.requests()).toHaveLength(2);
+});
+
 test("batching: an effect reading fields of two observers runs once per query update", async () => {
   let title = "Walk the dog";
   const app = await open("./fixtures/useQuery/batching.tsx", {

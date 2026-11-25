@@ -201,7 +201,26 @@ export function useQueries<T extends Array<any>, TCombinedResult extends object 
           throw result.error;
         }
       });
-      return getCombinedResult(trackResult()) as TCombinedResult;
+      // An observer does not notify about a property nobody has read yet, so
+      // a read finding that the property changed since these results were
+      // taken answers with the current value and has them taken again.
+      const observers = observer.getObservers();
+      const taken = observers.map((each) => each.getCurrentResult());
+      const tracked = trackResult().map((result, index) => {
+        const each = observers[index];
+        if (!each || each.options.queryHash !== queries[index]?.queryHash) return result;
+        return new Proxy(result, {
+          get(target, key) {
+            const value = Reflect.get(target, key);
+            if (!observer.hasListeners()) return value;
+            const now = Reflect.get(each.getCurrentResult(), key);
+            if (now === Reflect.get(taken[index]!, key)) return value;
+            untracked(() => version.update((n) => n + 1));
+            return now;
+          },
+        });
+      });
+      return getCombinedResult(tracked) as TCombinedResult;
     });
   });
 
