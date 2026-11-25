@@ -45,3 +45,24 @@ test("combine does not run again while no result changes", async () => {
   await app.press("Combines");
   expect(app.texts()).toContain(settled);
 });
+
+test("a property first read after it changed shows the current value", async () => {
+  const app = await open("./fixtures/useQueries/late-read.tsx", { clock: {}, network });
+  await app.clock!.runFor(50);
+  await app.press("Handler");
+  expect(app.texts()).toContain("handler: success,success");
+  await app.press("Detail");
+  expect(app.texts()).toContain("names: Ada,Grace");
+
+  await app.press("Add");
+  expect(app.texts()).toContain("names: Ada,Grace,...");
+  await app.clock!.runFor(50);
+  expect(app.texts()).toContain("names: Ada,Grace,Linus");
+
+  await app.press("Refetch");
+  await app.press("Indicator");
+  expect(app.texts()).toContain("fetching: true,false,false");
+  await app.clock!.runFor(50);
+  expect(app.texts()).toContain("fetching: false,false,false");
+  expect(app.requests()).toHaveLength(4);
+});

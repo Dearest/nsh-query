@@ -60,8 +60,15 @@ export function useBaseQuery<TQueryFnData, TError, TData, TQueryData, TQueryKey 
     });
   });
 
+  // The observer does not notify about a property nobody has read yet, so the
+  // first read of one catches up with whatever changed in the meantime.
+  const tracked = new Set<string>();
   return readonlyView(result, (prop) => {
-    observer.trackProp(prop as keyof QueryObserverResult);
+    if (!tracked.has(prop)) {
+      tracked.add(prop);
+      observer.trackProp(prop as keyof QueryObserverResult);
+      if (observer.hasListeners()) untracked(() => result.set(observer.getCurrentResult()));
+    }
     if (prop !== "data") return;
     const current = untracked(result);
     if (
